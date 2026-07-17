@@ -1,109 +1,61 @@
-##🔐 Password Manager
+🔐 Secure Password Manager
+A local, encrypted password manager with AES‑256‑GCM and a master password that is never stored.
 
-A secure, offline desktop password manager built with Python and Tkinter, featuring AES-256 encryption, a local SQLite vault, and a clean, modern GUI.
+✨ Features
+One master password unlocks everything.
 
-Show Image
-Show Image
-Show Image
+Strong encryption: AES‑256‑GCM + PBKDF2 (200k iterations).
 
+Passwords stored as encrypted blobs (nonce + tag + ciphertext).
 
-##Overview
+Built‑in password generator (custom length).
 
-This application allows users to securely store, retrieve, and manage website credentials on their local machine. All passwords are encrypted with AES-256 (GCM mode) before being written to the database, and the vault can only be unlocked with a master password that is never stored anywhere on disk.
+Search, add, update, delete, and copy to clipboard.
 
+Clean dark‑themed GUI (Tkinter).
 
-##Features
+🧠 Security Design
+What	How
+Master password	Never stored – used only to derive the key.
+Salt + Key derivation	Random 16‑byte salt + PBKDF2‑HMAC‑SHA256 (200k iterations).
+Encryption	AES‑256‑GCM (confidentiality + integrity).
+Verification	Encrypted known string – successful decryption proves correct password.
+Database	SQLite – stores only nonce + tag + ciphertext.
+⚠️ No password reset – if you forget the master password, your vault is unrecoverable.
 
-FeatureDescription🔑 Master Password LoginA single master password protects the entire vault. The application cannot be opened without it.🔒 AES-256 EncryptionEvery stored password is individually encrypted using AES-256-GCM before being saved to the database.🎲 Password GeneratorInstantly generate strong random passwords with a configurable length.🔍 Live SearchFilter saved credentials in real time by website or username.➕ Add / ✏️ Edit / 🗑️ DeleteFull CRUD support for managing saved credentials.📋 Copy to ClipboardCopy any password to the clipboard with a single click.🎨 Modern GUIA polished, dark-themed interface built with Tkinter and ttk — no external UI framework required.
+🖥️ Usage
+First run: Create a master password (min. 6 characters).
 
+Login: Enter your master password to unlock.
 
-##How It Works
+Manage: View, add, edit, delete, search, and copy passwords.
 
-The application never stores the master password itself. Instead, it derives an encryption key from the password each time the app is unlocked:
+Generate: Click Generate to create a secure password.
 
-Master Password
-      │
-      ▼  PBKDF2-HMAC-SHA256 (200,000 iterations + random salt)
-AES-256 Key   (kept in memory only, never written to disk)
-      │
-      ▼  AES-256-GCM
-Plaintext Password ──encrypt──▶ nonce + tag + ciphertext ──▶ SQLite BLOB
+📁 File Structure
+text
+.
+├── crypto_utils.py       # encryption/decryption
+├── db.py                 # SQLite operations
+├── gui.py                # Tkinter interface
+├── main.py               # entry point
+├── password_generator.py # random password generator
+├── requirements.txt
+└── vault.db              # database (auto‑created)
+🛠️ Technologies
+Python 3.8+, Tkinter, SQLite, pycryptodome, pyperclip.
 
-At login, the typed password is used to re-derive the key, which is then used to attempt decryption of a stored "verifier" value. If decryption fails, the password is rejected — meaning no password hash ever needs to be stored either.
+🔧 Customisation
+Edit crypto_utils.py to change:
 
-As a result, if the database file were ever copied or stolen, it would contain nothing but encrypted, unreadable bytes.
+python
+PBKDF2_ITERATIONS = 200_000   # increase for more security
+KEY_LENGTH_BYTES = 32         # AES‑256
+SALT_LENGTH_BYTES = 16
+Changing these after first run will break decryption.
 
+📄 License
+MIT – see LICENSE.
 
-##Project Structure
-
-password-manager/
-├── main.py               # Application entry point
-├── gui.py                # Tkinter GUI (login screen + vault screen)
-├── db.py                 # SQLite operations and master password verification
-├── crypto_utils.py       # AES-256-GCM encryption/decryption and key derivation
-├── password_generator.py # Random secure password generator
-├── requirements.txt      # Python dependencies
-├── .gitignore
-└── README.md
-
-
-##Database Schema
-
-config — single-row table storing app-level security settings
-
-ColumnTypeDescriptionidINTAlways 1key_saltBLOBSalt used for PBKDF2 key derivationverifierBLOBEncrypted known value used to validate login
-
-passwords — stores all saved credentials
-
-ColumnTypeDescriptionidINTPrimary key, auto-incrementwebsiteTEXTWebsite or service nameusernameTEXTAssociated username or emailencrypted_passwordBLOBAES-256-GCM encrypted password blob
-
-
-##Installation
-
-Prerequisites: Python 3.9 or higher
-
-bash# 1. Clone the repository
-git clone https://github.com/<your-username>/password-manager.git
-cd password-manager
-
-# 2. (Recommended) Create a virtual environment
-python -m venv venv
-source venv/bin/activate        # On Windows: venv\Scripts\activate
-
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Run the application
-python main.py
-
-On first launch, you will be prompted to create a master password. This password is required on every subsequent launch and cannot be recovered or reset — this is intentional, as the encryption key is derived directly from it.
-
-
-##Tech Stack
-
-LibraryPurposetkinterGraphical user interface (built into Python)sqlite3Local database storage (built into Python)pycryptodomeAES-256-GCM encryptionhashlibPBKDF2 key derivation from the master passwordos, random, stringSecure salts, nonces, and password generationpyperclip (optional)One-click clipboard copy; falls back to Tkinter's native clipboard if unavailable
-
-
-##Security Notes
-
-
-The master password is never written to disk in any form.
-Encryption keys exist only in memory for the duration of a session.
-Each password is encrypted individually with a unique nonce (AES-GCM), so identical passwords never produce identical ciphertext.
-AES-GCM provides both confidentiality and integrity — any tampering with stored data is detected automatically during decryption.
-
-
-
-##Roadmap
-
-
- Change master password (re-encrypt vault with a new key)
- Auto-lock after a period of inactivity
- Password strength indicator
- Encrypted vault export/import
- Light/dark theme toggle
-
-
-##Author
-
-Built by Diya Pahooja — BS Computer Science student.
+## Author 
+Diya Pahooja
